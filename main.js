@@ -109,11 +109,13 @@ export default function SquishyList(rootEl, opts) {
 
 	function getRemainingItems() {
 		return allItemEls.filter(function(el) {
-			return hiddenItemEls.indexOf(el) === -1;
+			return (hiddenItemEls && hiddenItemEls.indexOf(el) === -1);
 		});
 	}
 
 	function squish() {
+        let previousHidden = getHiddenItems();
+        let previousRemaining = getRemainingItems();
 		showAllItems();
 		if (doesContentFit()) {
 			hideEl(moreEl);
@@ -126,10 +128,16 @@ export default function SquishyList(rootEl, opts) {
 				}
 			}
 		}
-		dispatchCustomEvent('oSquishyList.change', {
-			hiddenItems: getHiddenItems(),
-			remainingItems: getRemainingItems()
-		});
+        let hiddenItems = getHiddenItems();
+        let remainingItems = getRemainingItems();
+        let hiddenChanged = (previousHidden && previousHidden.length !== hiddenItems.length);
+        let remainingChanged = (previousRemaining && previousRemaining.length !== remainingItems.length);
+        if (!previousHidden || hiddenChanged || remainingChanged) {
+    		dispatchCustomEvent('oSquishyList.change', {
+    			hiddenItems: hiddenItems,
+    			remainingItems: remainingItems
+    		});
+        }
 	}
 
 	function resizeHandler() {
